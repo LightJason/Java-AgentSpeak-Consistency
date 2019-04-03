@@ -32,6 +32,7 @@ import org.lightjason.agentspeak.beliefbase.CBeliefbase;
 import org.lightjason.agentspeak.beliefbase.storage.CMultiStorage;
 import org.lightjason.agentspeak.beliefbase.view.IView;
 import org.lightjason.agentspeak.beliefbase.view.IViewGenerator;
+import org.lightjason.agentspeak.common.CPath;
 import org.lightjason.agentspeak.consistency.filter.CAllFilter;
 import org.lightjason.agentspeak.consistency.filter.CBeliefFilter;
 import org.lightjason.agentspeak.consistency.filter.CPlanFilter;
@@ -44,7 +45,9 @@ import org.lightjason.agentspeak.consistency.metric.CWeightedDifferenceDistance;
 import org.lightjason.agentspeak.consistency.metric.IMetric;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.ILiteral;
-import org.lightjason.agentspeak.language.execution.instantiable.plan.IPlan;
+import org.lightjason.agentspeak.language.execution.IExecution;
+import org.lightjason.agentspeak.language.execution.instantiable.plan.CPlan;
+import org.lightjason.agentspeak.language.execution.instantiable.plan.annotation.IAnnotation;
 import org.lightjason.agentspeak.language.execution.instantiable.plan.statistic.CPlanStatistic;
 import org.lightjason.agentspeak.language.execution.instantiable.plan.trigger.CTrigger;
 import org.lightjason.agentspeak.language.execution.instantiable.plan.trigger.ITrigger;
@@ -317,13 +320,43 @@ public final class TestCMetric extends IBaseTest
         m_literals.forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
 
         final ITrigger l_trigger = CTrigger.of( ITrigger.EType.ADDGOAL, CLiteral.of( "myplan" ) );
-        l_agent.plans().put( l_trigger, CPlanStatistic.of( IPlan.EMPTY ) );
+        l_agent.plans().put( l_trigger, CPlanStatistic.of( new CPlan( new IAnnotation<?>[]{}, l_trigger, new IExecution[]{} ) ) );
         l_agent.trigger( l_trigger );
         l_agent.call();
 
-        System.out.println( new CAllFilter().apply( l_agent ).collect( Collectors.toList() ) );
-        System.out.println( new CPlanFilter().apply( l_agent ).collect( Collectors.toList() ) );
-        System.out.println( new CBeliefFilter().apply( l_agent ).collect( Collectors.toList() ) );
+
+        Assert.assertArrayEquals(
+            Stream.of( "myplan[]", "toplevel[]", "first/sub1[]", "first/sub2[]", "second/sub3[]", "second/sub4[]", "second/second/sub/sub5[]" ).toArray(),
+            new CAllFilter().apply( l_agent ).map( Object::toString ).toArray()
+        );
+
+        Assert.assertArrayEquals(
+            Stream.of( "myplan[]" ).toArray(),
+            new CPlanFilter().apply( l_agent ).map( Object::toString ).toArray()
+        );
+
+        Assert.assertArrayEquals(
+            Stream.of( "toplevel[]", "first/sub1[]", "first/sub2[]", "second/sub3[]", "second/sub4[]", "second/second/sub/sub5[]" ).toArray(),
+            new CBeliefFilter().apply( l_agent ).map( Object::toString ).toArray()
+        );
+    }
+
+    /**
+     * test filter with path
+     *
+     * @throws Exception on agent execution
+     */
+    @Test
+    public void filterwithpath() throws Exception
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        final IAgent<?> l_agent = m_agentgenerator.generatesingle();
+        m_literals.forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
+
+        System.out.println( l_agent.beliefbase() );
+        System.out.println( new CAllFilter( CPath.of( "first" ) ).apply( l_agent ).collect( Collectors.toList() ) );
     }
 
 

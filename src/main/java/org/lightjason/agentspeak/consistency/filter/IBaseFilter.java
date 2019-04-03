@@ -25,6 +25,7 @@ package org.lightjason.agentspeak.consistency.filter;
 
 import org.lightjason.agentspeak.common.IPath;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -58,19 +59,9 @@ public abstract class IBaseFilter implements IFilter
      *
      * @param p_paths collection of path
      */
-    protected IBaseFilter( final Collection<IPath> p_paths )
+    protected IBaseFilter( @Nonnull final Collection<IPath> p_paths )
     {
-        if ( Objects.nonNull( p_paths ) )
-            m_paths.addAll( p_paths );
+        m_paths.addAll( p_paths );
     }
 
-    /**
-     * returns the selectors
-     *
-     * @return selector
-     */
-    public final Collection<IPath> getSelector()
-    {
-        return m_paths;
-    }
 }
