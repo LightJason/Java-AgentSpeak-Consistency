@@ -21,36 +21,45 @@
  * @endcond
  */
 
-package org.lightjason.agentspeak.consistency.metric;
+package org.lightjason.agentspeak.consistency.filter;
 
+import org.lightjason.agentspeak.agent.IAgent;
+import org.lightjason.agentspeak.common.IPath;
 import org.lightjason.agentspeak.language.ITerm;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 /**
- * metric on collections returns the size of symmetric difference
- *
- * @see http://mathworld.wolfram.com/SymmetricDifference.html
+ * filtering for all beliefs
  */
-public final class CSymmetricDifference implements IMetric
+public final class CBeliefFilter extends IBaseFilter
 {
+    /**
+     * ctor
+     *
+     * @param p_paths list of path for beliefs filter
+     */
+    public CBeliefFilter( final IPath... p_paths )
+    {
+        super( p_paths );
+    }
+
+    /**
+     * ctor
+     *
+     * @param p_paths path collection
+     */
+    public CBeliefFilter( final Collection<IPath> p_paths )
+    {
+        super( p_paths );
+    }
 
     @Override
-    public Double apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
+    public Stream<? extends ITerm> apply( final IAgent<?> p_agent )
     {
-        final Collection<ITerm> l_first = p_first.collect( Collectors.toCollection( HashSet::new ) );
-        final Collection<ITerm> l_second = p_second.collect( Collectors.toCollection( HashSet::new ) );
-
-        return (double) Stream.concat( l_first.stream(), l_second.stream() )
-                              .sorted()
-                              .distinct()
-                              .parallel()
-                              .filter( i -> !( l_first.contains( i ) && l_second.contains( i ) ) )
-                              .count();
+        return p_agent.beliefbase().stream( m_paths.isEmpty() ? null : m_paths.toArray( new IPath[m_paths.size()] ) );
     }
 
 }

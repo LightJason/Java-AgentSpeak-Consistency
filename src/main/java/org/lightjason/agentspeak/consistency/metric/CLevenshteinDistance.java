@@ -75,7 +75,7 @@ public final class CLevenshteinDistance implements IMetric
 
 
     @Override
-    public Double apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
+    public Number apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
     {
         return CCommon.levenshtein(
             p_first.map( Object::toString ).collect( Collectors.joining( "" ) ),

@@ -25,8 +25,6 @@ package org.lightjason.agentspeak.consistency;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.lightjason.agentspeak.agent.IAgent;
-import org.lightjason.agentspeak.consistency.filter.IFilter;
-import org.lightjason.agentspeak.consistency.metric.IMetric;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -109,21 +107,5 @@ public interface IConsistency extends Callable<IConsistency>
      */
     @Nonnull
     IConsistency clear();
-
-    /**
-     * returns the used metric
-     *
-     * @return metric
-     */
-    @Nonnull
-    IMetric metric();
-
-    /**
-     * returns the used metric filter
-     *
-     * @return filter
-     */
-    @Nonnull
-    IFilter filter();
 
 }

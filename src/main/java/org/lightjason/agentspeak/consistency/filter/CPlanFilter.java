@@ -21,42 +21,24 @@
  * @endcond
  */
 
-package org.lightjason.agentspeak.consistency.metric;
+package org.lightjason.agentspeak.consistency.filter;
 
+import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.ITerm;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 /**
- * calculates the distance with respect
- * to size of union and intersection of beliefbases.
+ * filtering for all execution plans & beliefs
  */
-public final class CWeightedDifference implements IMetric
+public final class CPlanFilter implements IFilter
 {
 
     @Override
-    public Double apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
+    public Stream<? extends ITerm> apply( final IAgent<?> p_agent )
     {
-        final Collection<ITerm> l_first = p_first.collect( Collectors.toCollection( HashSet::new ) );
-        final Collection<ITerm> l_second = p_second.collect( Collectors.toCollection( HashSet::new ) );
-
-        // element aggregation
-        final double l_union = Stream.concat( l_first.stream(), l_second.stream() ).count();
-        final Set<? extends ITerm> l_intersection = new HashSet<>( l_first );
-        l_intersection.retainAll( l_second );
-
-        // return distance
-        return ( 2.0 * l_union
-                 - l_first.size()
-                 - l_second.size()
-               )
-               * l_union
-               / l_intersection.size();
+        return p_agent.runningplans().values().stream();
     }
 
 }

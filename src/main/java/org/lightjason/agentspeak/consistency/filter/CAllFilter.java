@@ -24,21 +24,46 @@
 package org.lightjason.agentspeak.consistency.filter;
 
 import org.lightjason.agentspeak.agent.IAgent;
+import org.lightjason.agentspeak.common.IPath;
 import org.lightjason.agentspeak.language.ITerm;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 
 /**
  * filtering for all execution plans & beliefs
  */
-public final class CPlan implements IFilter
+public final class CAllFilter extends IBaseFilter
 {
+
+    /**
+     * ctor
+     *
+     * @param p_paths list of path for beliefs filter
+     */
+    public CAllFilter( final IPath... p_paths )
+    {
+        super( p_paths );
+    }
+
+    /**
+     * ctor
+     *
+     * @param p_paths path collection
+     */
+    public CAllFilter( final Collection<IPath> p_paths )
+    {
+        super( p_paths );
+    }
 
     @Override
     public Stream<? extends ITerm> apply( final IAgent<?> p_agent )
     {
-        return p_agent.runningplans().values().stream();
+        return Stream.concat(
+            p_agent.runningplans().values().stream(),
+            p_agent.beliefbase().stream( m_paths.isEmpty() ? null : m_paths.toArray( new IPath[m_paths.size()] ) )
+        );
     }
 
 }

@@ -32,16 +32,22 @@ import org.lightjason.agentspeak.beliefbase.CBeliefbase;
 import org.lightjason.agentspeak.beliefbase.storage.CMultiStorage;
 import org.lightjason.agentspeak.beliefbase.view.IView;
 import org.lightjason.agentspeak.beliefbase.view.IViewGenerator;
-import org.lightjason.agentspeak.consistency.filter.CAll;
+import org.lightjason.agentspeak.consistency.filter.CAllFilter;
+import org.lightjason.agentspeak.consistency.filter.CBeliefFilter;
+import org.lightjason.agentspeak.consistency.filter.CPlanFilter;
 import org.lightjason.agentspeak.consistency.filter.IFilter;
-import org.lightjason.agentspeak.consistency.metric.CDiscrete;
+import org.lightjason.agentspeak.consistency.metric.CDiscreteDistance;
 import org.lightjason.agentspeak.consistency.metric.CLevenshteinDistance;
-import org.lightjason.agentspeak.consistency.metric.CNCD;
-import org.lightjason.agentspeak.consistency.metric.CSymmetricDifference;
-import org.lightjason.agentspeak.consistency.metric.CWeightedDifference;
+import org.lightjason.agentspeak.consistency.metric.CNormalizedCompressionDistance;
+import org.lightjason.agentspeak.consistency.metric.CSymmetricDifferenceDistance;
+import org.lightjason.agentspeak.consistency.metric.CWeightedDifferenceDistance;
 import org.lightjason.agentspeak.consistency.metric.IMetric;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.ILiteral;
+import org.lightjason.agentspeak.language.execution.instantiable.plan.IPlan;
+import org.lightjason.agentspeak.language.execution.instantiable.plan.statistic.CPlanStatistic;
+import org.lightjason.agentspeak.language.execution.instantiable.plan.trigger.CTrigger;
+import org.lightjason.agentspeak.language.execution.instantiable.plan.trigger.ITrigger;
 import org.lightjason.agentspeak.testing.IBaseTest;
 
 import java.util.Collection;
@@ -106,8 +112,8 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
             "symmetric difference equality",
-            new CAll(),
-            new CSymmetricDifference(),
+            new CAllFilter(),
+            new CSymmetricDifferenceDistance(),
             m_literals,
             m_literals,
             0, 0
@@ -125,8 +131,8 @@ public final class TestCMetric extends IBaseTest
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
         this.check(
             "symmetric difference inequality",
-            new CAll(),
-            new CSymmetricDifference(),
+            new CAllFilter(),
+            new CSymmetricDifferenceDistance(),
             m_literals,
             Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "diff" ) ) ).collect( Collectors.toSet() ),
             1, 0
@@ -145,8 +151,8 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
             "weight difference equality",
-            new CAll(),
-            new CWeightedDifference(),
+            new CAllFilter(),
+            new CWeightedDifferenceDistance(),
             m_literals,
             m_literals,
             24, 0
@@ -165,8 +171,8 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
             "weight difference inequality",
-            new CAll(),
-            new CWeightedDifference(),
+            new CAllFilter(),
+            new CWeightedDifferenceDistance(),
             m_literals,
             Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "diff" ) ) ).collect( Collectors.toSet() ),
             28 + 1.0 / 6, 0
@@ -185,8 +191,8 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
                 "discrete difference equality",
-                new CAll(),
-                new CDiscrete(),
+                new CAllFilter(),
+                new CDiscreteDistance(),
                 m_literals,
                 m_literals,
                 0, 0
@@ -205,8 +211,8 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
                 "weight difference inequality",
-                new CAll(),
-                new CDiscrete(),
+                new CAllFilter(),
+                new CDiscreteDistance(),
                 m_literals,
                 Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "discrete" ) ) ).collect( Collectors.toSet() ),
                 1, 0
@@ -225,8 +231,8 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
             "ncd difference equality",
-            new CAll(),
-            new CNCD(),
+            new CAllFilter(),
+            new CNormalizedCompressionDistance(),
             m_literals,
             m_literals,
             0, 0
@@ -244,8 +250,8 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
             "ncd difference inequality",
-            new CAll(),
-            new CNCD(),
+            new CAllFilter(),
+            new CNormalizedCompressionDistance(),
             m_literals,
             Stream.of(
                 CLiteral.of( "ncd" ),
@@ -268,7 +274,7 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
             "levenshtein difference equality",
-            new CAll(),
+            new CAllFilter(),
             new CLevenshteinDistance(),
             m_literals,
             m_literals,
@@ -288,12 +294,36 @@ public final class TestCMetric extends IBaseTest
 
         this.check(
             "levenshtein difference inequality",
-            new CAll(),
+            new CAllFilter(),
             new CLevenshteinDistance(),
             m_literals,
             Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "levenshtein" ) ) ).collect( Collectors.toSet() ),
             13, 0
         );
+    }
+
+    /**
+     * test filter
+     *
+     * @throws Exception on agent execution
+     */
+    @Test
+    public void filter() throws Exception
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        final IAgent<?> l_agent = m_agentgenerator.generatesingle();
+        m_literals.forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
+
+        final ITrigger l_trigger = CTrigger.of( ITrigger.EType.ADDGOAL, CLiteral.of( "myplan" ) );
+        l_agent.plans().put( l_trigger, CPlanStatistic.of( IPlan.EMPTY ) );
+        l_agent.trigger( l_trigger );
+        l_agent.call();
+
+        System.out.println( new CAllFilter().apply( l_agent ).collect( Collectors.toList() ) );
+        System.out.println( new CPlanFilter().apply( l_agent ).collect( Collectors.toList() ) );
+        System.out.println( new CBeliefFilter().apply( l_agent ).collect( Collectors.toList() ) );
     }
 
 
@@ -314,7 +344,7 @@ public final class TestCMetric extends IBaseTest
         final double l_value = p_metric.apply(
             p_filter.apply( this.agent( p_belief1 ) ),
             p_filter.apply( this.agent( p_belief2 ) )
-        );
+        ).doubleValue();
         Assert.assertEquals( p_message, p_excepted, l_value, p_delta );
     }
 

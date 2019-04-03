@@ -21,48 +21,52 @@
  * @endcond
  */
 
-package org.lightjason.agentspeak.consistency.filter;
+package org.lightjason.agentspeak.consistency.metric;
 
-import org.lightjason.agentspeak.agent.IAgent;
-import org.lightjason.agentspeak.common.IPath;
+import org.lightjason.agentspeak.language.CCommon;
 import org.lightjason.agentspeak.language.ITerm;
 
-import java.util.Collection;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 /**
- * filtering for all execution plans & beliefs
+ * metric based on the normalized-compression-distance
+ *
+ * @see https://en.wikipedia.org/wiki/Normalized_compression_distance
  */
-public final class CAll extends IBaseFilter
+public final class CNormalizedCompressionDistance implements IMetric
 {
+    /**
+     * compression algorithm
+     */
+    private final CCommon.ECompression m_compression;
 
     /**
      * ctor
-     *
-     * @param p_paths list of path for beliefs filter
      */
-    public CAll( final IPath... p_paths )
+    public CNormalizedCompressionDistance()
     {
-        super( p_paths );
+        this( CCommon.ECompression.BZIP );
     }
 
     /**
      * ctor
      *
-     * @param p_paths path collection
+     * @param p_compression compression algorithm
      */
-    public CAll( final Collection<IPath> p_paths )
+    public CNormalizedCompressionDistance( final CCommon.ECompression p_compression )
     {
-        super( p_paths );
+        m_compression = p_compression;
     }
 
     @Override
-    public Stream<? extends ITerm> apply( final IAgent<?> p_agent )
+    public Number apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
     {
-        return Stream.concat(
-            p_agent.runningplans().values().stream(),
-            p_agent.beliefbase().stream( m_paths.isEmpty() ? null : m_paths.toArray( new IPath[m_paths.size()] ) )
+        return CCommon.ncd(
+            m_compression,
+            p_first.map( Object::toString ).collect( Collectors.joining( "" ) ),
+            p_second.map( Object::toString ).collect( Collectors.joining( "" ) )
         );
     }
 

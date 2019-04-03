@@ -32,20 +32,25 @@ import java.util.stream.Stream;
 
 
 /**
- * generic discrete metric
+ * metric on collections returns the size of symmetric difference
  *
- * @see http://mathworld.wolfram.com/DiscreteMetric.html
+ * @see http://mathworld.wolfram.com/SymmetricDifference.html
  */
-public final class CDiscrete implements IMetric
+public final class CSymmetricDifferenceDistance implements IMetric
 {
 
     @Override
-    public Double apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
+    public Number apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
     {
         final Collection<ITerm> l_first = p_first.collect( Collectors.toCollection( HashSet::new ) );
         final Collection<ITerm> l_second = p_second.collect( Collectors.toCollection( HashSet::new ) );
 
-        return ( l_first.containsAll( l_second ) ) && ( l_second.containsAll( l_first ) ) ? 0.0 : 1.0;
+        return (double) Stream.concat( l_first.stream(), l_second.stream() )
+                              .sorted()
+                              .distinct()
+                              .parallel()
+                              .filter( i -> !( l_first.contains( i ) && l_second.contains( i ) ) )
+                              .count();
     }
 
 }

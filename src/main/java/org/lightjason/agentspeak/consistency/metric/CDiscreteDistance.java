@@ -23,51 +23,29 @@
 
 package org.lightjason.agentspeak.consistency.metric;
 
-import org.lightjason.agentspeak.language.CCommon;
 import org.lightjason.agentspeak.language.ITerm;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 /**
- * metric based on the normalized-compression-distance
+ * generic discrete metric
  *
- * @see https://en.wikipedia.org/wiki/Normalized_compression_distance
+ * @see http://mathworld.wolfram.com/DiscreteMetric.html
  */
-public final class CNCD implements IMetric
+public final class CDiscreteDistance implements IMetric
 {
-    /**
-     * compression algorithm
-     */
-    private final CCommon.ECompression m_compression;
-
-    /**
-     * ctor
-     */
-    public CNCD()
-    {
-        this( CCommon.ECompression.BZIP );
-    }
-
-    /**
-     * ctor
-     *
-     * @param p_compression compression algorithm
-     */
-    public CNCD( final CCommon.ECompression p_compression )
-    {
-        m_compression = p_compression;
-    }
 
     @Override
-    public Double apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
+    public Number apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
     {
-        return CCommon.ncd(
-            m_compression,
-            p_first.map( Object::toString ).collect( Collectors.joining( "" ) ),
-            p_second.map( Object::toString ).collect( Collectors.joining( "" ) )
-        );
+        final Collection<ITerm> l_first = p_first.collect( Collectors.toCollection( HashSet::new ) );
+        final Collection<ITerm> l_second = p_second.collect( Collectors.toCollection( HashSet::new ) );
+
+        return ( l_first.containsAll( l_second ) ) && ( l_second.containsAll( l_first ) ) ? 0.0 : 1.0;
     }
 
 }

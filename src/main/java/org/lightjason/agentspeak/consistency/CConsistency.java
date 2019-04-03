@@ -210,20 +210,6 @@ public final class CConsistency implements IConsistency
 
     @Nonnull
     @Override
-    public IMetric metric()
-    {
-        return m_metric;
-    }
-
-    @Nonnull
-    @Override
-    public IFilter filter()
-    {
-        return m_filter;
-    }
-
-    @Nonnull
-    @Override
     public Stream<Map.Entry<IAgent<?>, Double>> consistency()
     {
         return m_data.entrySet().stream().map( i -> new AbstractMap.SimpleImmutableEntry<>( i.getKey(), i.getValue().getKey() ) );
@@ -271,7 +257,7 @@ public final class CConsistency implements IConsistency
         return m_metric.apply(
             m_filter.apply( p_first ),
             m_filter.apply( p_second )
-        );
+        ).doubleValue();
     }
 
     /**

@@ -21,45 +21,42 @@
  * @endcond
  */
 
-package org.lightjason.agentspeak.consistency.filter;
+package org.lightjason.agentspeak.consistency.metric;
 
-import org.lightjason.agentspeak.agent.IAgent;
-import org.lightjason.agentspeak.common.IPath;
 import org.lightjason.agentspeak.language.ITerm;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 /**
- * filtering for all beliefs
+ * calculates the distance with respect
+ * to size of union and intersection of beliefbases.
  */
-public final class CBelief extends IBaseFilter
+public final class CWeightedDifferenceDistance implements IMetric
 {
-    /**
-     * ctor
-     *
-     * @param p_paths list of path for beliefs filter
-     */
-    public CBelief( final IPath... p_paths )
-    {
-        super( p_paths );
-    }
-
-    /**
-     * ctor
-     *
-     * @param p_paths path collection
-     */
-    public CBelief( final Collection<IPath> p_paths )
-    {
-        super( p_paths );
-    }
 
     @Override
-    public Stream<? extends ITerm> apply( final IAgent<?> p_agent )
+    public Number apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
     {
-        return p_agent.beliefbase().stream( m_paths.isEmpty() ? null : m_paths.toArray( new IPath[m_paths.size()] ) );
+        final Collection<ITerm> l_first = p_first.collect( Collectors.toCollection( HashSet::new ) );
+        final Collection<ITerm> l_second = p_second.collect( Collectors.toCollection( HashSet::new ) );
+
+        // element aggregation
+        final double l_union = Stream.concat( l_first.stream(), l_second.stream() ).count();
+        final Set<? extends ITerm> l_intersection = new HashSet<>( l_first );
+        l_intersection.retainAll( l_second );
+
+        // return distance
+        return ( 2.0 * l_union
+                 - l_first.size()
+                 - l_second.size()
+               )
+               * l_union
+               / l_intersection.size();
     }
 
 }

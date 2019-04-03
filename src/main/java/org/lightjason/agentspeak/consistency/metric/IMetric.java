@@ -34,6 +34,6 @@ import java.util.stream.Stream;
  *
  * @see http://en.wikipedia.org/wiki/Metric_space
  */
-public interface IMetric extends BiFunction<Stream<? extends ITerm>, Stream<? extends ITerm>, Double>
+public interface IMetric extends BiFunction<Stream<? extends ITerm>, Stream<? extends ITerm>, Number>
 {
 }
