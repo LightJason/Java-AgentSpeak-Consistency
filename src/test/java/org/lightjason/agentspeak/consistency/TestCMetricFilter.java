@@ -61,9 +61,9 @@ import java.util.stream.Stream;
 
 
 /**
- * metric tests
+ * metric & filter tests
  */
-public final class TestCMetric extends IBaseTest
+public final class TestCMetricFilter extends IBaseTest
 {
     /**
      * assume message
