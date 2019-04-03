@@ -23,34 +23,51 @@
 
 package org.lightjason.agentspeak.consistency.metric;
 
+import org.lightjason.agentspeak.language.CCommon;
 import org.lightjason.agentspeak.language.ITerm;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 /**
- * metric on collections returns the size of symmetric difference
+ * metric based on the normalized-compression-distance
  *
- * @see http://mathworld.wolfram.com/SymmetricDifference.html
+ * @see https://en.wikipedia.org/wiki/Normalized_compression_distance
  */
-public final class CSymmetricDifferenceDistance implements IMetric
+public final class CNCD implements IMetric
 {
+    /**
+     * compression algorithm
+     */
+    private final CCommon.ECompression m_compression;
+
+    /**
+     * ctor
+     */
+    public CNCD()
+    {
+        this( CCommon.ECompression.BZIP );
+    }
+
+    /**
+     * ctor
+     *
+     * @param p_compression compression algorithm
+     */
+    public CNCD( final CCommon.ECompression p_compression )
+    {
+        m_compression = p_compression;
+    }
 
     @Override
     public Number apply( final Stream<? extends ITerm> p_first, final Stream<? extends ITerm> p_second )
     {
-        final Collection<ITerm> l_first = p_first.collect( Collectors.toCollection( HashSet::new ) );
-        final Collection<ITerm> l_second = p_second.collect( Collectors.toCollection( HashSet::new ) );
-
-        return (double) Stream.concat( l_first.stream(), l_second.stream() )
-                              .sorted()
-                              .distinct()
-                              .parallel()
-                              .filter( i -> !( l_first.contains( i ) && l_second.contains( i ) ) )
-                              .count();
+        return CCommon.ncd(
+            m_compression,
+            p_first.map( Object::toString ).collect( Collectors.joining( "" ) ),
+            p_second.map( Object::toString ).collect( Collectors.joining( "" ) )
+        );
     }
 
 }

@@ -39,9 +39,9 @@ import org.lightjason.agentspeak.consistency.filter.CPlanFilter;
 import org.lightjason.agentspeak.consistency.filter.IFilter;
 import org.lightjason.agentspeak.consistency.metric.CDiscreteDistance;
 import org.lightjason.agentspeak.consistency.metric.CLevenshteinDistance;
-import org.lightjason.agentspeak.consistency.metric.CNormalizedCompressionDistance;
-import org.lightjason.agentspeak.consistency.metric.CSymmetricDifferenceDistance;
-import org.lightjason.agentspeak.consistency.metric.CWeightedDifferenceDistance;
+import org.lightjason.agentspeak.consistency.metric.CNCD;
+import org.lightjason.agentspeak.consistency.metric.CSymmetricDifference;
+import org.lightjason.agentspeak.consistency.metric.CWeightedDifference;
 import org.lightjason.agentspeak.consistency.metric.IMetric;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
@@ -80,7 +80,7 @@ public final class TestCMetricFilter extends IBaseTest
     /**
      * literal view generator
      */
-    private IViewGenerator m_generator;
+    private IViewGenerator m_viewgenerator;
     /**
      * set with testing literals
      */
@@ -94,7 +94,7 @@ public final class TestCMetricFilter extends IBaseTest
     @Before
     public void initialize() throws Exception
     {
-        m_generator = new CGenerator();
+        m_viewgenerator = new CGenerator();
         m_agentgenerator = new CAgentGenerator();
 
         m_literals = Stream.of(
@@ -115,13 +115,15 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void symmetricweightequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         this.check(
             "symmetric difference equality",
             new CAllFilter(),
-            new CSymmetricDifferenceDistance(),
+            new CSymmetricDifference(),
             m_literals,
             m_literals,
             0, 0
@@ -135,12 +137,15 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void symmetricweightinequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
         this.check(
             "symmetric difference inequality",
             new CAllFilter(),
-            new CSymmetricDifferenceDistance(),
+            new CSymmetricDifference(),
             m_literals,
             Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "diff" ) ) ).collect( Collectors.toSet() ),
             1, 0
@@ -154,13 +159,15 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void weightequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         this.check(
             "weight difference equality",
             new CAllFilter(),
-            new CWeightedDifferenceDistance(),
+            new CWeightedDifference(),
             m_literals,
             m_literals,
             24, 0
@@ -174,13 +181,15 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void weightinequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         this.check(
             "weight difference inequality",
             new CAllFilter(),
-            new CWeightedDifferenceDistance(),
+            new CWeightedDifference(),
             m_literals,
             Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "diff" ) ) ).collect( Collectors.toSet() ),
             28 + 1.0 / 6, 0
@@ -194,6 +203,8 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void discreteequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
@@ -214,6 +225,8 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void discreteinequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
@@ -234,13 +247,15 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void ncdequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         this.check(
             "ncd difference equality",
             new CAllFilter(),
-            new CNormalizedCompressionDistance(),
+            new CNCD(),
             m_literals,
             m_literals,
             0, 0
@@ -253,13 +268,15 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void ncdinequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         this.check(
             "ncd difference inequality",
             new CAllFilter(),
-            new CNormalizedCompressionDistance(),
+            new CNCD(),
             m_literals,
             Stream.of(
                 CLiteral.of( "ncd" ),
@@ -277,6 +294,8 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void levenshteinequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
@@ -297,6 +316,8 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void levenshteininequality()
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
@@ -318,11 +339,13 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void filter() throws Exception
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         final IAgent<?> l_agent = m_agentgenerator.generatesingle();
-        m_literals.forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
+        m_literals.forEach( i -> l_agent.beliefbase().generate( m_viewgenerator, i.functorpath() ).add( i ) );
 
         final ITrigger l_trigger = CTrigger.of( ITrigger.EType.ADDGOAL, CLiteral.of( "myplan" ) );
         l_agent.plans().put( l_trigger, CPlanStatistic.of( new CPlan( new IAnnotation<?>[]{}, l_trigger, new IExecution[]{} ) ) );
@@ -354,6 +377,8 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void filterwithpath() throws Exception
     {
+        Assume.assumeNotNull( m_agentgenerator );
+        Assume.assumeNotNull( m_viewgenerator );
         Assume.assumeNotNull( m_literals );
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
@@ -365,7 +390,7 @@ public final class TestCMetricFilter extends IBaseTest
                 CLiteral.of( FIRSTSUB1, CRawTerm.of( 2 ) ),
                 CLiteral.of( FIRSTSUB1, CRawTerm.of( 3 ) )
             )
-        ).forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
+        ).forEach( i -> l_agent.beliefbase().generate( m_viewgenerator, i.functorpath() ).add( i ) );
 
 
         Assert.assertArrayEquals(
@@ -421,10 +446,10 @@ public final class TestCMetricFilter extends IBaseTest
      */
     private IAgent<?> agent( final Collection<ILiteral> p_literals )
     {
-        Assume.assumeNotNull( m_generator );
+        Assume.assumeNotNull( m_viewgenerator );
 
         final IAgent<?> l_agent = m_agentgenerator.generatesingle();
-        p_literals.forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
+        p_literals.forEach( i -> l_agent.beliefbase().generate( m_viewgenerator, i.functorpath() ).add( i ) );
         return l_agent;
     }
 

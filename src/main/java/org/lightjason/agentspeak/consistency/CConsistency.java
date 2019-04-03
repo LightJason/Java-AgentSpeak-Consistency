@@ -36,17 +36,20 @@ import cern.jet.math.tdouble.DoubleMult;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.lightjason.agentspeak.agent.IAgent;
+import org.lightjason.agentspeak.consistency.filter.CBeliefFilter;
 import org.lightjason.agentspeak.consistency.filter.IFilter;
+import org.lightjason.agentspeak.consistency.metric.CNCD;
 import org.lightjason.agentspeak.consistency.metric.IMetric;
-import org.lightjason.agentspeak.error.CEnumConstantNotPresentException;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.text.MessageFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -56,6 +59,22 @@ import java.util.stream.Stream;
  */
 public final class CConsistency implements IConsistency
 {
+    /**
+     * default metric
+     */
+    public static final IMetric DEFAULTMETRIC = new CNCD();
+    /**
+     * default filter
+     */
+    public static final IFilter DEFAULTFILTER = new CBeliefFilter();
+    /**
+     * default iteration
+     */
+    public static final int DEFAULTITERATION = 8;
+    /**
+     * default epsilon
+     */
+    public static final double DEFAULTEPSILON = 0.001;
     /**
      * default value on non-existing objects
      */
@@ -107,8 +126,8 @@ public final class CConsistency implements IConsistency
      * @param p_iteration iterations
      * @param p_epsilon epsilon consistency
      */
-    private CConsistency( @Nonnull final EAlgorithm p_algorithm, @Nonnull final IFilter p_filter, @Nonnull final IMetric p_metric,
-                          final int p_iteration, final double p_epsilon
+    public CConsistency( @Nonnull final EAlgorithm p_algorithm, @Nonnull final IFilter p_filter,
+                         @Nonnull final IMetric p_metric, final int p_iteration, final double p_epsilon
     )
     {
         m_filter = p_filter;
@@ -123,14 +142,6 @@ public final class CConsistency implements IConsistency
     public DescriptiveStatistics statistic()
     {
         return m_statistic;
-    }
-
-    @Nonnull
-    @Override
-    public IConsistency add( @Nonnull final IAgent<?> p_object )
-    {
-        m_data.putIfAbsent( p_object, DEFAULTNONEXISTING );
-        return this;
     }
 
     @Override
@@ -171,7 +182,7 @@ public final class CConsistency implements IConsistency
         // check for a zero-matrix
         final DoubleMatrix1D l_eigenvector = l_matrix.zSum() <= m_data.size() * m_epsilon
                                              ? new DenseDoubleMatrix1D( m_data.size() )
-                                             : m_algorithm.getStationaryDistribution( m_iteration, l_matrix );
+                                             : m_algorithm.apply( m_iteration, l_matrix );
 
         // calculate the inverted probability and normalize with 1-norm
         final DoubleMatrix1D l_invertedeigenvector = new DenseDoubleMatrix1D( l_eigenvector.toArray() );
@@ -193,18 +204,40 @@ public final class CConsistency implements IConsistency
 
     @Nonnull
     @Override
-    public IConsistency remove( @Nonnull final IAgent<?> p_object )
+    public IConsistency clear()
     {
-        m_data.remove( p_object );
+        m_statistic.clear();
+        m_data.clear();
         return this;
     }
 
     @Nonnull
     @Override
-    public IConsistency clear()
+    public IConsistency add( @Nonnull final IAgent<?>... p_agents )
     {
-        m_statistic.clear();
-        m_data.clear();
+        return this.add( Arrays.stream( p_agents ) );
+    }
+
+    @Nonnull
+    @Override
+    public IConsistency add( @Nonnull final Stream<IAgent<?>> p_agents )
+    {
+        p_agents.forEach( i -> m_data.putIfAbsent( i, DEFAULTNONEXISTING ) );
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public IConsistency remove( @Nonnull final IAgent<?>... p_agents )
+    {
+        return this.remove( Arrays.stream( p_agents ) );
+    }
+
+    @Nonnull
+    @Override
+    public IConsistency remove( @Nonnull final Stream<IAgent<?>> p_agents )
+    {
+        p_agents.forEach( m_data::remove );
         return this;
     }
 
@@ -316,48 +349,43 @@ public final class CConsistency implements IConsistency
     /**
      * numeric algorithm structure
      */
-    private enum EAlgorithm
+    public enum EAlgorithm implements BiFunction<Integer, DoubleMatrix2D, DoubleMatrix1D>
     {
         /**
          * use numeric algorithm (QR decomposition)
          **/
-        NUMERICAL,
+        NUMERICAL
+        {
+            @Override
+            public DoubleMatrix1D apply( final Integer p_iteration, final DoubleMatrix2D p_matrix )
+            {
+                return normalize( getLargestEigenvector( p_matrix ) );
+            }
+        },
         /**
          * use stochastic algorithm (fixpoint iteration)
          **/
-        FIXPOINT;
-
+        FIXPOINT
+        {
+            @Override
+            public DoubleMatrix1D apply( final Integer p_iteration, final DoubleMatrix2D p_matrix )
+            {
+                return normalize( getLargestEigenvector( p_matrix, p_iteration ) );
+            }
+        };
 
 
         /**
-         * calculates the stationary distribution
+         * normalize eigenvector and create positiv oriantation
          *
-         * @param p_iteration number of iteration
-         * @param p_matrix transition matrix
-         * @return stationary distribution
+         * @param p_eigenvector eigen vector
+         * @return normalized eigen vector
          */
-        public DoubleMatrix1D getStationaryDistribution( final int p_iteration, final DoubleMatrix2D p_matrix )
+        private static DoubleMatrix1D normalize( @Nonnull  final DoubleMatrix1D p_eigenvector )
         {
-            final DoubleMatrix1D l_eigenvector;
-            switch ( this )
-            {
-                case FIXPOINT:
-                    l_eigenvector = getLargestEigenvector( p_matrix, p_iteration );
-                    break;
-
-                case NUMERICAL:
-                    l_eigenvector = getLargestEigenvector( p_matrix );
-                    break;
-
-                default:
-                    throw new CEnumConstantNotPresentException( this.getClass(), this.toString() );
-            }
-
-            // normalize eigenvector and create positiv oriantation
-            l_eigenvector.assign( DoubleMult.div( ALGEBRA.norm1( l_eigenvector ) ) );
-            l_eigenvector.assign( DoubleFunctions.abs );
-
-            return l_eigenvector;
+            p_eigenvector.assign( DoubleMult.div( ALGEBRA.norm1( p_eigenvector ) ) );
+            p_eigenvector.assign( DoubleFunctions.abs );
+            return p_eigenvector;
         }
 
         /**

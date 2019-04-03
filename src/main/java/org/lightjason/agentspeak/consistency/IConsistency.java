@@ -83,22 +83,42 @@ public interface IConsistency extends Callable<IConsistency>
     DescriptiveStatistics statistic();
 
     /**
-     * adds a new object
+     * adds agents
      *
-     * @param p_object new object
+     * @param p_agents agents
      * @return self reference
      */
     @Nonnull
-    IConsistency add( @Nonnull final IAgent<?> p_object );
+    IConsistency add( @Nonnull final IAgent<?>... p_agents );
 
     /**
-     * removes an object
+     * adds agents
      *
-     * @param p_object removing object
+     * @param p_agents agent stream
      * @return self reference
      */
     @Nonnull
-    IConsistency remove( @Nonnull final IAgent<?> p_object );
+    IConsistency add( @Nonnull final Stream<IAgent<?>> p_agents );
+
+
+    /**
+     * removes agents
+     *
+     * @param p_agents removing agents
+     * @return self reference
+     */
+    @Nonnull
+    IConsistency remove( @Nonnull final IAgent<?>... p_agents );
+
+    /**
+     * removes agents
+     *
+     * @param p_agents agent stream
+     * @return self reference
+     */
+    @Nonnull
+    IConsistency remove( @Nonnull final Stream<IAgent<?>> p_agents );
+
 
     /**
      * clear

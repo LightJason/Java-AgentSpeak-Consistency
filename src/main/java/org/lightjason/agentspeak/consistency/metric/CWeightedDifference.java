@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  * calculates the distance with respect
  * to size of union and intersection of beliefbases.
  */
-public final class CWeightedDifferenceDistance implements IMetric
+public final class CWeightedDifference implements IMetric
 {
 
     @Override
