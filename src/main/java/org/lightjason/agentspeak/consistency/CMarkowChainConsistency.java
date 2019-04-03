@@ -55,9 +55,9 @@ import java.util.stream.Stream;
 
 
 /**
- * layer with consistency data based a markov-chain
+ * consistency algorithm based on a markov-chain
  */
-public final class CConsistency implements IConsistency
+public final class CMarkowChainConsistency implements IConsistency
 {
     /**
      * default metric
@@ -126,8 +126,8 @@ public final class CConsistency implements IConsistency
      * @param p_iteration iterations
      * @param p_epsilon epsilon consistency
      */
-    public CConsistency( @Nonnull final EAlgorithm p_algorithm, @Nonnull final IFilter p_filter,
-                         @Nonnull final IMetric p_metric, final int p_iteration, final double p_epsilon
+    public CMarkowChainConsistency( @Nonnull final EAlgorithm p_algorithm, @Nonnull final IFilter p_filter,
+                                    @Nonnull final IMetric p_metric, final int p_iteration, final double p_epsilon
     )
     {
         m_filter = p_filter;
@@ -302,7 +302,7 @@ public final class CConsistency implements IConsistency
      */
     public static IConsistency numeric( final IFilter p_filter, final IMetric p_metric )
     {
-        return new CConsistency( EAlgorithm.NUMERICAL, p_filter, p_metric, 0, 0.001 );
+        return new CMarkowChainConsistency( EAlgorithm.NUMERICAL, p_filter, p_metric, 0, 0.001 );
     }
 
     /**
@@ -314,7 +314,7 @@ public final class CConsistency implements IConsistency
      */
     public static IConsistency heuristic( final IFilter p_filter, final IMetric p_metric )
     {
-        return new CConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, 8, 0.001 );
+        return new CMarkowChainConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, 8, 0.001 );
     }
 
     /**
@@ -327,7 +327,7 @@ public final class CConsistency implements IConsistency
      */
     public static IConsistency heuristic( final IFilter p_filter, final IMetric p_metric, final int p_iteration )
     {
-        return new CConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, p_iteration, 0.001 );
+        return new CMarkowChainConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, p_iteration, 0.001 );
     }
 
     /**
@@ -341,7 +341,7 @@ public final class CConsistency implements IConsistency
      */
     public static IConsistency heuristic( final IFilter p_filter, final IMetric p_metric, final int p_iteration, final double p_epsilon )
     {
-        return new CConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, p_iteration, p_epsilon );
+        return new CMarkowChainConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, p_iteration, p_epsilon );
     }
 
 

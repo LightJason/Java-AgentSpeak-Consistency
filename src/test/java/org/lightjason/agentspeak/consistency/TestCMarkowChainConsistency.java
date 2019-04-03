@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * test consistency
  */
-public final class TestCConsistency extends IBaseTest
+public final class TestCMarkowChainConsistency extends IBaseTest
 {
     /**
      * agent generator
@@ -91,12 +91,12 @@ public final class TestCConsistency extends IBaseTest
                     CLiteral.of( "ddd" ),
                     CLiteral.of( "eee" ) );
 
-        final IConsistency l_consistency = new CConsistency(
-            CConsistency.EAlgorithm.NUMERICAL,
-            CConsistency.DEFAULTFILTER,
-            CConsistency.DEFAULTMETRIC,
-            CConsistency.DEFAULTITERATION,
-            CConsistency.DEFAULTEPSILON
+        final IConsistency l_consistency = new CMarkowChainConsistency(
+            CMarkowChainConsistency.EAlgorithm.NUMERICAL,
+            CMarkowChainConsistency.DEFAULTFILTER,
+            CMarkowChainConsistency.DEFAULTMETRIC,
+            CMarkowChainConsistency.DEFAULTITERATION,
+            CMarkowChainConsistency.DEFAULTEPSILON
         ).add( l_agent1, l_agent2, l_agent3 ).call();
 
         System.out.println( l_consistency.consistency().map( i -> i.getValue() ).collect( Collectors.toList() ) );
