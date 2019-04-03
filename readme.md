@@ -1,0 +1,1 @@
+# LightJason - AgentSpeak Consistency
