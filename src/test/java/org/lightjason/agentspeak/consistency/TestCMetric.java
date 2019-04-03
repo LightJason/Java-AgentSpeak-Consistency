@@ -34,6 +34,9 @@ import org.lightjason.agentspeak.beliefbase.view.IView;
 import org.lightjason.agentspeak.beliefbase.view.IViewGenerator;
 import org.lightjason.agentspeak.consistency.filter.CAll;
 import org.lightjason.agentspeak.consistency.filter.IFilter;
+import org.lightjason.agentspeak.consistency.metric.CDiscrete;
+import org.lightjason.agentspeak.consistency.metric.CLevenshteinDistance;
+import org.lightjason.agentspeak.consistency.metric.CNCD;
 import org.lightjason.agentspeak.consistency.metric.CSymmetricDifference;
 import org.lightjason.agentspeak.consistency.metric.CWeightedDifference;
 import org.lightjason.agentspeak.consistency.metric.IMetric;
@@ -52,6 +55,10 @@ import java.util.stream.Stream;
  */
 public final class TestCMetric extends IBaseTest
 {
+    /**
+     * assume message
+     */
+    private static final String ASSUMEMESSAGE = "testing literals are empty";
     /**
      * agent generator
      */
@@ -95,10 +102,12 @@ public final class TestCMetric extends IBaseTest
     public void symmetricweightequality()
     {
         Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( "testing literals are empty", m_literals.isEmpty() );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
         this.check(
             "symmetric difference equality",
-            new CAll(), new CSymmetricDifference(),
+            new CAll(),
+            new CSymmetricDifference(),
             m_literals,
             m_literals,
             0, 0
@@ -113,10 +122,11 @@ public final class TestCMetric extends IBaseTest
     public void symmetricweightinequality()
     {
         Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( "testing literals are empty", m_literals.isEmpty() );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
         this.check(
             "symmetric difference inequality",
-            new CAll(), new CSymmetricDifference(),
+            new CAll(),
+            new CSymmetricDifference(),
             m_literals,
             Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "diff" ) ) ).collect( Collectors.toSet() ),
             1, 0
@@ -131,11 +141,12 @@ public final class TestCMetric extends IBaseTest
     public void weightequality()
     {
         Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( "testing literals are empty", m_literals.isEmpty() );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         this.check(
             "weight difference equality",
-            new CAll(), new CWeightedDifference(),
+            new CAll(),
+            new CWeightedDifference(),
             m_literals,
             m_literals,
             24, 0
@@ -150,7 +161,7 @@ public final class TestCMetric extends IBaseTest
     public void weightinequality()
     {
         Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( "testing literals are empty", m_literals.isEmpty() );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         this.check(
             "weight difference inequality",
@@ -159,6 +170,129 @@ public final class TestCMetric extends IBaseTest
             m_literals,
             Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "diff" ) ) ).collect( Collectors.toSet() ),
             28 + 1.0 / 6, 0
+        );
+    }
+
+
+    /**
+     * test discrete metric equality
+     */
+    @Test
+    public void discreteequality()
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        this.check(
+                "discrete difference equality",
+                new CAll(),
+                new CDiscrete(),
+                m_literals,
+                m_literals,
+                0, 0
+        );
+    }
+
+
+    /**
+     * test discrete metric equality
+     */
+    @Test
+    public void discreteinequality()
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        this.check(
+                "weight difference inequality",
+                new CAll(),
+                new CDiscrete(),
+                m_literals,
+                Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "discrete" ) ) ).collect( Collectors.toSet() ),
+                1, 0
+        );
+    }
+
+
+    /**
+     * test ncd metric equality
+     */
+    @Test
+    public void ncdequality()
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        this.check(
+            "ncd difference equality",
+            new CAll(),
+            new CNCD(),
+            m_literals,
+            m_literals,
+            0, 0
+        );
+    }
+
+    /**
+     * test symmetric metric inequality
+     */
+    @Test
+    public void ncdinequality()
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        this.check(
+            "ncd difference inequality",
+            new CAll(),
+            new CNCD(),
+            m_literals,
+            Stream.of(
+                CLiteral.of( "ncd" ),
+                CLiteral.of( "xxx" ),
+                CLiteral.of( "opq" )
+            ).collect( Collectors.toSet() ),
+            0.52, 0.01
+        );
+    }
+
+
+    /**
+     * test levenshtein metric equality
+     */
+    @Test
+    public void levenshteinequality()
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        this.check(
+            "levenshtein difference equality",
+            new CAll(),
+            new CLevenshteinDistance(),
+            m_literals,
+            m_literals,
+            0, 0
+        );
+    }
+
+
+    /**
+     * test levenshtein metric equality
+     */
+    @Test
+    public void levenshteininequality()
+    {
+        Assume.assumeNotNull( m_literals );
+        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+
+        this.check(
+            "levenshtein difference inequality",
+            new CAll(),
+            new CLevenshteinDistance(),
+            m_literals,
+            Stream.concat( m_literals.stream(), Stream.of( CLiteral.of( "levenshtein" ) ) ).collect( Collectors.toSet() ),
+            13, 0
         );
     }
 

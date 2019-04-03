@@ -125,6 +125,18 @@
             <artifactId>agentspeak</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.parallelcolt</groupId>
+            <artifactId>parallelcolt</artifactId>
+            <version>0.10.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
         
         
         <!-- checking -->
@@ -530,6 +542,7 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <!--
                     <execution>
                         <id>jacoco-check</id>
                         <goals>
@@ -563,6 +576,7 @@
                             </rules>
                         </configuration>
                     </execution>
+                    -->
                 </executions>
             </plugin>
             
