@@ -23,15 +23,17 @@
 
 package org.lightjason.agentspeak.consistency;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.lightjason.agentspeak.agent.IAgent;
+import org.lightjason.agentspeak.consistency.metric.CDiscreteDistance;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.testing.IBaseTest;
 
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -83,26 +85,27 @@ public final class TestCMarkowChainConsistency extends IBaseTest
                     CLiteral.of( "hello" ) );
 
         final IAgent<?> l_agent3 = m_agentgenerator.generatesingle();
-        l_agent1.beliefbase()
-                .add(
-                    CLiteral.of( "aaa" ),
-                    CLiteral.of( "bbb" ),
-                    CLiteral.of( "ccc" ),
-                    CLiteral.of( "ddd" ),
-                    CLiteral.of( "eee" ) );
+        IntStream.range( 0, 1500 )
+                 .boxed()
+                 .forEach( i -> l_agent3.beliefbase().add( CLiteral.of( RandomStringUtils.random( 12, "abcdefghijklmnopqrstuvwxyz".toCharArray() ) ) ) );
+
 
         final IConsistency l_consistency = new CMarkowChainConsistency(
             CMarkowChainConsistency.EAlgorithm.NUMERICAL,
             CMarkowChainConsistency.DEFAULTFILTER,
-            CMarkowChainConsistency.DEFAULTMETRIC,
+            new CDiscreteDistance(),
             CMarkowChainConsistency.DEFAULTITERATION,
             CMarkowChainConsistency.DEFAULTEPSILON
         ).add( l_agent1, l_agent2, l_agent3 ).call();
 
-        System.out.println( l_consistency.consistency().map( i -> i.getValue() ).collect( Collectors.toList() ) );
-        Assert.assertEquals( 0, l_consistency.consistency( l_agent1 ) - l_consistency.consistency( l_agent2 ), 0.01  );
-        Assert.assertEquals( 0.08, l_consistency.consistency( l_agent1 ) - l_consistency.consistency( l_agent3 ), 0.01  );
-        Assert.assertEquals( 0.08, l_consistency.consistency( l_agent2 ) - l_consistency.consistency( l_agent3 ), 0.01  );
+
+        System.out.println( l_consistency.consistency( l_agent1 ) );
+        System.out.println( l_consistency.consistency( l_agent2 ) );
+        System.out.println( l_consistency.consistency( l_agent3 ) );
+
+        Assert.assertEquals( 0.0, l_consistency.consistency( l_agent1 ) - l_consistency.consistency( l_agent2 ), 0.01  );
+        Assert.assertEquals( 0.2, l_consistency.consistency( l_agent1 ) - l_consistency.consistency( l_agent3 ), 0.05  );
+        Assert.assertEquals( 0.2, l_consistency.consistency( l_agent2 ) - l_consistency.consistency( l_agent3 ), 0.05  );
     }
 
 }

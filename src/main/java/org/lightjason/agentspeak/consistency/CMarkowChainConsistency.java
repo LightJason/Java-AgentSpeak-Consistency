@@ -193,11 +193,8 @@ public final class CMarkowChainConsistency implements IConsistency
         m_statistic.clear();
         IntStream.range( 0, l_keys.size() )
                  .boxed()
-                 .forEach( i ->
-                 {
-                     m_statistic.addValue( l_eigenvector.get( i ) );
-                     m_data.put( l_keys.get( i ), new AbstractMap.SimpleImmutableEntry<>( l_invertedeigenvector.get( i ), l_eigenvector.get( i ) ) );
-                 } );
+                 .peek( i -> m_statistic.addValue( l_eigenvector.get( i ) ) )
+                 .forEach( i -> m_data.put( l_keys.get( i ), new AbstractMap.SimpleImmutableEntry<>( l_invertedeigenvector.get( i ), l_eigenvector.get( i ) ) ) );
 
         return this;
     }
