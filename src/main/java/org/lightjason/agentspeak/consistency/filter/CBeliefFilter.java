@@ -27,7 +27,6 @@ import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.common.IPath;
 import org.lightjason.agentspeak.language.ITerm;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 
@@ -49,9 +48,9 @@ public final class CBeliefFilter extends IBaseFilter
     /**
      * ctor
      *
-     * @param p_paths path collection
+     * @param p_paths path stream
      */
-    public CBeliefFilter( final Collection<IPath> p_paths )
+    public CBeliefFilter( final Stream<IPath> p_paths )
     {
         super( p_paths );
     }

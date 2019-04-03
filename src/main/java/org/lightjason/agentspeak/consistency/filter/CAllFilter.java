@@ -27,7 +27,6 @@ import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.common.IPath;
 import org.lightjason.agentspeak.language.ITerm;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 
@@ -50,9 +49,9 @@ public final class CAllFilter extends IBaseFilter
     /**
      * ctor
      *
-     * @param p_paths path collection
+     * @param p_paths path stream
      */
-    public CAllFilter( final Collection<IPath> p_paths )
+    public CAllFilter( final Stream<IPath> p_paths )
     {
         super( p_paths );
     }

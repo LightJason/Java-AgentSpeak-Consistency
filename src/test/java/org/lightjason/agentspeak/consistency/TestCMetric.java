@@ -44,6 +44,7 @@ import org.lightjason.agentspeak.consistency.metric.CSymmetricDifferenceDistance
 import org.lightjason.agentspeak.consistency.metric.CWeightedDifferenceDistance;
 import org.lightjason.agentspeak.consistency.metric.IMetric;
 import org.lightjason.agentspeak.language.CLiteral;
+import org.lightjason.agentspeak.language.CRawTerm;
 import org.lightjason.agentspeak.language.ILiteral;
 import org.lightjason.agentspeak.language.execution.IExecution;
 import org.lightjason.agentspeak.language.execution.instantiable.plan.CPlan;
@@ -68,6 +69,10 @@ public final class TestCMetric extends IBaseTest
      * assume message
      */
     private static final String ASSUMEMESSAGE = "testing literals are empty";
+    /**
+     * literal functor
+     */
+    private static final String FIRSTSUB1 = "first/sub1";
     /**
      * agent generator
      */
@@ -94,7 +99,7 @@ public final class TestCMetric extends IBaseTest
 
         m_literals = Stream.of(
             CLiteral.of( "toplevel" ),
-            CLiteral.of( "first/sub1" ),
+            CLiteral.of( FIRSTSUB1 ),
             CLiteral.of( "first/sub2" ),
             CLiteral.of( "second/sub3" ),
             CLiteral.of( "second/sub4" ),
@@ -326,7 +331,7 @@ public final class TestCMetric extends IBaseTest
 
 
         Assert.assertArrayEquals(
-            Stream.of( "myplan[]", "toplevel[]", "first/sub1[]", "first/sub2[]", "second/sub3[]", "second/sub4[]", "second/second/sub/sub5[]" ).toArray(),
+            Stream.of( "myplan[]", "toplevel[]", FIRSTSUB1 + "[]", "first/sub2[]", "second/sub3[]", "second/sub4[]", "second/second/sub/sub5[]" ).toArray(),
             new CAllFilter().apply( l_agent ).map( Object::toString ).toArray()
         );
 
@@ -336,7 +341,7 @@ public final class TestCMetric extends IBaseTest
         );
 
         Assert.assertArrayEquals(
-            Stream.of( "toplevel[]", "first/sub1[]", "first/sub2[]", "second/sub3[]", "second/sub4[]", "second/second/sub/sub5[]" ).toArray(),
+            Stream.of( "toplevel[]", FIRSTSUB1 + "[]", "first/sub2[]", "second/sub3[]", "second/sub4[]", "second/second/sub/sub5[]" ).toArray(),
             new CBeliefFilter().apply( l_agent ).map( Object::toString ).toArray()
         );
     }
@@ -353,10 +358,36 @@ public final class TestCMetric extends IBaseTest
         Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
 
         final IAgent<?> l_agent = m_agentgenerator.generatesingle();
-        m_literals.forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
+        Stream.concat(
+            m_literals.stream(),
+            Stream.of(
+                CLiteral.of( FIRSTSUB1, CRawTerm.of( 1 ) ),
+                CLiteral.of( FIRSTSUB1, CRawTerm.of( 2 ) ),
+                CLiteral.of( FIRSTSUB1, CRawTerm.of( 3 ) )
+            )
+        ).forEach( i -> l_agent.beliefbase().generate( m_generator, i.functorpath() ).add( i ) );
 
-        System.out.println( l_agent.beliefbase() );
-        System.out.println( new CAllFilter( CPath.of( "first" ) ).apply( l_agent ).collect( Collectors.toList() ) );
+
+        Assert.assertArrayEquals(
+            Stream.of( "sub1[]", "sub1[1]", "sub1[2]", "sub1[3]" ).toArray(),
+            new CAllFilter( CPath.of( FIRSTSUB1 ) ).apply( l_agent ).map( Object::toString ).toArray()
+        );
+
+        Assert.assertArrayEquals(
+            Stream.of( "sub1[]", "sub1[1]", "sub1[2]", "sub1[3]" ).toArray(),
+            new CAllFilter( CPath.of( FIRSTSUB1 ) ).apply( l_agent ).map( Object::toString ).toArray()
+        );
+
+
+        Assert.assertArrayEquals(
+            Stream.of( "sub1[]", "sub1[1]", "sub1[2]", "sub1[3]" ).toArray(),
+            new CAllFilter( Stream.of( CPath.of( FIRSTSUB1 ) ) ).apply( l_agent ).map( Object::toString ).toArray()
+        );
+
+        Assert.assertArrayEquals(
+            Stream.of( "sub1[]", "sub1[1]", "sub1[2]", "sub1[3]" ).toArray(),
+            new CAllFilter( Stream.of( CPath.of( FIRSTSUB1 ) ) ).apply( l_agent ).map( Object::toString ).toArray()
+        );
     }
 
 

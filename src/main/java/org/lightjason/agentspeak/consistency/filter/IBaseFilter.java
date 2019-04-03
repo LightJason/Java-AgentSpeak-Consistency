@@ -27,10 +27,11 @@ import org.lightjason.agentspeak.common.IPath;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -41,27 +42,28 @@ public abstract class IBaseFilter implements IFilter
     /**
      * set with paths
      */
-    protected final Set<IPath> m_paths = new HashSet<>();
+    protected final Set<IPath> m_paths;
 
     /**
      * ctor
      *
-     * @param p_paths for reading agent value
+     * @param p_paths path
      */
     protected IBaseFilter( final IPath... p_paths )
     {
-        if ( Objects.nonNull( p_paths ) )
-            m_paths.addAll( Arrays.asList( p_paths ) );
+        m_paths = Objects.isNull( p_paths )
+                  ? Collections.emptySet()
+                  : Arrays.stream( p_paths ).collect( Collectors.toSet() );
     }
 
     /**
      * ctor
      *
-     * @param p_paths collection of path
+     * @param p_paths path stream
      */
-    protected IBaseFilter( @Nonnull final Collection<IPath> p_paths )
+    protected IBaseFilter( @Nonnull final Stream<IPath> p_paths )
     {
-        m_paths.addAll( p_paths );
+        m_paths = p_paths.collect( Collectors.toSet() );
     }
 
 }
