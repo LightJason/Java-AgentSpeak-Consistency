@@ -106,10 +106,28 @@ public final class TestCMarkowChainConsistency extends IBaseTest
             l_consistency.consistency().map( Map.Entry::getValue ).sorted().toArray()
         );
 
+        Assert.assertArrayEquals(
+            Stream.of( 0.5, 0.7240092377397959, 0.775990762260204 ).toArray(),
+            Stream.of(
+                l_consistency.consistency( l_agent1 ),
+                l_consistency.consistency( l_agent2 ),
+                l_consistency.consistency( l_agent3 )
+            ).sorted().toArray()
+        );
+
 
         Assert.assertArrayEquals(
             Stream.of( 0.22400923773979595, 0.27599076226020414, 0.5 ).toArray(),
             l_consistency.inconsistency().map( Map.Entry::getValue ).sorted().toArray()
+        );
+
+        Assert.assertArrayEquals(
+            Stream.of( 0.22400923773979595, 0.27599076226020414, 0.5 ).toArray(),
+            Stream.of(
+                l_consistency.inconsistency( l_agent1 ),
+                l_consistency.inconsistency( l_agent2 ),
+                l_consistency.inconsistency( l_agent3 )
+            ).sorted().toArray()
         );
     }
 

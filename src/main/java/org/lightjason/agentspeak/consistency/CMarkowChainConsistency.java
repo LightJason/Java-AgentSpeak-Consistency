@@ -47,7 +47,6 @@ import org.lightjason.agentspeak.language.CCommon;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.text.MessageFormat;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
@@ -265,12 +264,6 @@ public final class CMarkowChainConsistency implements IConsistency
     public Stream<Map.Entry<IAgent<?>, Double>> inconsistency()
     {
         return m_data.entrySet().stream().map( i -> new AbstractMap.SimpleImmutableEntry<>( i.getKey(), i.getValue().getValue() ) );
-    }
-
-    @Override
-    public String toString()
-    {
-        return MessageFormat.format( "{0}{1}", super.toString(), m_data );
     }
 
     /**
