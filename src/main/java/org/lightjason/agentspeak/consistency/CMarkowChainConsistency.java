@@ -72,7 +72,7 @@ public final class CMarkowChainConsistency implements IConsistency
     /**
      * default iteration
      */
-    public static final int DEFAULTITERATION = 8;
+    public static final int DEFAULTITERATION = 5;
     /**
      * default epsilon
      */

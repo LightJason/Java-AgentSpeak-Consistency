@@ -102,32 +102,112 @@ public final class TestCMarkowChainConsistency extends IBaseTest
 
 
         Assert.assertArrayEquals(
-            Stream.of( 0.5, 0.7240092377397959, 0.775990762260204 ).toArray(),
-            l_consistency.consistency().map( Map.Entry::getValue ).sorted().toArray()
+            Stream.of( 0.5, 0.7240092377397959, 0.775990762260204 ).mapToDouble( i -> i ).toArray(),
+            l_consistency.consistency().mapToDouble( Map.Entry::getValue ).sorted().toArray(),
+            0.01
         );
 
         Assert.assertArrayEquals(
-            Stream.of( 0.5, 0.7240092377397959, 0.775990762260204 ).toArray(),
+            Stream.of( 0.5, 0.7240092377397959, 0.775990762260204 ).mapToDouble( i -> i ).toArray(),
             Stream.of(
                 l_consistency.consistency( l_agent1 ),
                 l_consistency.consistency( l_agent2 ),
                 l_consistency.consistency( l_agent3 )
-            ).sorted().toArray()
+            ).mapToDouble( i -> i ).sorted().toArray(),
+            0.01
         );
 
 
         Assert.assertArrayEquals(
-            Stream.of( 0.22400923773979595, 0.27599076226020414, 0.5 ).toArray(),
-            l_consistency.inconsistency().map( Map.Entry::getValue ).sorted().toArray()
+            Stream.of( 0.22400923773979595, 0.27599076226020414, 0.5 ).mapToDouble( i -> i ).toArray(),
+            l_consistency.inconsistency().mapToDouble( Map.Entry::getValue ).sorted().toArray(),
+            0.01
         );
 
         Assert.assertArrayEquals(
-            Stream.of( 0.22400923773979595, 0.27599076226020414, 0.5 ).toArray(),
+            Stream.of( 0.22400923773979595, 0.27599076226020414, 0.5 ).mapToDouble( i -> i ).toArray(),
             Stream.of(
                 l_consistency.inconsistency( l_agent1 ),
                 l_consistency.inconsistency( l_agent2 ),
                 l_consistency.inconsistency( l_agent3 )
-            ).sorted().toArray()
+            ).mapToDouble( i -> i ).sorted().toArray(),
+            0.01
+        );
+    }
+
+
+    /**
+     * test fixpoint consistency
+     *
+     * @throws Exception is thrown on agent generating error
+     */
+    @Test
+    public void fixpoint() throws Exception
+    {
+        Assume.assumeNotNull( m_agentgenerator );
+
+
+        final IAgent<?> l_agent1 = m_agentgenerator.generatesingle();
+        l_agent1.beliefbase()
+                .add(
+                    CLiteral.of( "foo" ),
+                    CLiteral.of( "xxx" ),
+                    CLiteral.of( "bar" ) );
+
+        final IAgent<?> l_agent2 = m_agentgenerator.generatesingle();
+        l_agent2.beliefbase()
+                .add(
+                    CLiteral.of( "foo" ),
+                    CLiteral.of( "xxx" ),
+                    CLiteral.of( "bar" ),
+                    CLiteral.of( "hello" ) );
+
+        final IAgent<?> l_agent3 = m_agentgenerator.generatesingle();
+        IntStream.range( 0, 1500 )
+                 .boxed()
+                 .forEach( i -> l_agent3.beliefbase().add( CLiteral.of( RandomStringUtils.random( 12, "abcdefghijklmnopqrstuvwxyz".toCharArray() ) ) ) );
+
+
+        final IConsistency l_consistency = new CMarkowChainConsistency(
+            CMarkowChainConsistency.EAlgorithm.FIXPOINT,
+            CMarkowChainConsistency.DEFAULTFILTER,
+            new CDiscreteDistance(),
+            CMarkowChainConsistency.DEFAULTITERATION,
+            CMarkowChainConsistency.DEFAULTEPSILON
+        ).add( l_agent1, l_agent2, l_agent3 ).call();
+
+
+        Assert.assertArrayEquals(
+            Stream.of( 0.6566054547259637, 0.6702854287912592, 0.673109116482777 ).mapToDouble( i -> i ).toArray(),
+            l_consistency.consistency().mapToDouble( Map.Entry::getValue ).sorted().toArray(),
+            0.01
+        );
+
+        Assert.assertArrayEquals(
+            Stream.of( 0.6566054547259637, 0.6702854287912592, 0.673109116482777 ).mapToDouble( i -> i ).toArray(),
+            Stream.of(
+                l_consistency.consistency( l_agent1 ),
+                l_consistency.consistency( l_agent2 ),
+                l_consistency.consistency( l_agent3 )
+            ).mapToDouble( i -> i ).sorted().toArray(),
+            0.01
+        );
+
+
+        Assert.assertArrayEquals(
+            Stream.of( 0.33225070359075737, 0.3324919942364805, 0.33525730217276223 ).mapToDouble( i -> i ).toArray(),
+            l_consistency.inconsistency().mapToDouble( Map.Entry::getValue ).sorted().toArray(),
+            0.01
+        );
+
+        Assert.assertArrayEquals(
+            Stream.of( 0.33225070359075737, 0.3324919942364805, 0.33525730217276223 ).mapToDouble( i -> i ).toArray(),
+            Stream.of(
+                l_consistency.inconsistency( l_agent1 ),
+                l_consistency.inconsistency( l_agent2 ),
+                l_consistency.inconsistency( l_agent3 )
+            ).mapToDouble( i -> i ).sorted().toArray(),
+            0.01
         );
     }
 
