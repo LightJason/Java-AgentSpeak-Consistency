@@ -31,8 +31,11 @@ import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
 import cern.colt.matrix.tdouble.algo.decomposition.DenseDoubleEigenvalueDecomposition;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix1D;
 import cern.jet.math.tdouble.DoubleFunctions;
 import cern.jet.math.tdouble.DoubleMult;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.lightjason.agentspeak.agent.IAgent;
@@ -40,12 +43,12 @@ import org.lightjason.agentspeak.consistency.filter.CBeliefFilter;
 import org.lightjason.agentspeak.consistency.filter.IFilter;
 import org.lightjason.agentspeak.consistency.metric.CNCD;
 import org.lightjason.agentspeak.consistency.metric.IMetric;
+import org.lightjason.agentspeak.language.CCommon;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.text.MessageFormat;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -151,28 +154,26 @@ public final class CMarkowChainConsistency implements IConsistency
             return this;
 
         // get key list of map for addressing elements in the correct order
-        final ArrayList<IAgent<?>> l_keys = new ArrayList<>( m_data.keySet() );
+        final IAgent<?>[] l_keys = m_data.keySet().toArray( new IAgent<?>[m_data.size()] );
+
+        // create symmatric matrix
+        final DoubleMatrix2D l_matrix = new DenseDoubleMatrix2D( l_keys.length, l_keys.length );
 
         // calculate markov chain transition matrix
-        final DoubleMatrix2D l_matrix = new DenseDoubleMatrix2D( m_data.size(), m_data.size() );
-        IntStream.range( 0, l_keys.size() )
-                 .parallel()
+        generateindex( l_keys.length ).forEach( i ->
+        {
+            final double l_value = this.getMetricValue( l_keys[i.getLeft()], l_keys[i.getRight()] );
+            l_matrix.setQuick( i.getLeft(), i.getRight(), l_value );
+            l_matrix.setQuick( i.getRight(), i.getLeft(), l_value );
+        } );
+
+        // row-wise normalization for getting probabilities
+        IntStream.range( 0, l_keys.length )
                  .boxed()
                  .forEach( i ->
                  {
-                     final IAgent<?> l_item = l_keys.get( i );
-                     IntStream.range( i + 1, l_keys.size() )
-                              .boxed()
-                              .forEach( j ->
-                              {
-                                  final double l_value = this.getMetricValue( l_item, l_keys.get( j ) );
-                                  l_matrix.setQuick( i, j, l_value );
-                                  l_matrix.setQuick( j, i, l_value );
-                              } );
-
-                     // row-wise normalization for getting probabilities
                      final double l_norm = ALGEBRA.norm1( l_matrix.viewRow( i ) );
-                     if ( l_norm != 0 )
+                     if ( CCommon.floatingequal( l_norm, 0, m_epsilon ) )
                          l_matrix.viewRow( i ).assign( DoubleMult.div( l_norm ) );
 
                      // set epsilon slope for preventing periodic markov chains
@@ -180,8 +181,8 @@ public final class CMarkowChainConsistency implements IConsistency
                  } );
 
         // check for a zero-matrix
-        final DoubleMatrix1D l_eigenvector = l_matrix.zSum() <= m_data.size() * m_epsilon
-                                             ? new DenseDoubleMatrix1D( m_data.size() )
+        final DoubleMatrix1D l_eigenvector = l_matrix.zSum() <= l_keys.length * m_epsilon
+                                             ? new SparseDoubleMatrix1D( l_keys.length )
                                              : m_algorithm.apply( m_iteration, l_matrix );
 
         // calculate the inverted probability and normalize with 1-norm
@@ -191,10 +192,10 @@ public final class CMarkowChainConsistency implements IConsistency
 
         // set consistency for each entry and update statistic
         m_statistic.clear();
-        IntStream.range( 0, l_keys.size() )
+        IntStream.range( 0, l_keys.length )
                  .boxed()
                  .peek( i -> m_statistic.addValue( l_eigenvector.get( i ) ) )
-                 .forEach( i -> m_data.put( l_keys.get( i ), new AbstractMap.SimpleImmutableEntry<>( l_invertedeigenvector.get( i ), l_eigenvector.get( i ) ) ) );
+                 .forEach( i -> m_data.put( l_keys[i], new AbstractMap.SimpleImmutableEntry<>( l_invertedeigenvector.get( i ), l_eigenvector.get( i ) ) ) );
 
         return this;
     }
@@ -247,16 +248,16 @@ public final class CMarkowChainConsistency implements IConsistency
 
     @Nonnegative
     @Override
-    public double consistency( @Nonnull final IAgent<?> p_object )
+    public double consistency( @Nonnull final IAgent<?> p_agent )
     {
-        return m_data.getOrDefault( p_object, DEFAULTNONEXISTING ).getKey();
+        return m_data.getOrDefault( p_agent, DEFAULTNONEXISTING ).getKey();
     }
 
     @Nonnegative
     @Override
-    public double inconsistency( @Nonnull final IAgent<?> p_object )
+    public double inconsistency( @Nonnull final IAgent<?> p_agent )
     {
-        return m_data.getOrDefault( p_object, DEFAULTNONEXISTING ).getValue();
+        return m_data.getOrDefault( p_agent, DEFAULTNONEXISTING ).getValue();
     }
 
     @Nonnull
@@ -291,54 +292,14 @@ public final class CMarkowChainConsistency implements IConsistency
     }
 
     /**
-     * factory numerical algorithm
+     * generates the index pairs or a matrix
      *
-     * @param p_filter metric filter
-     * @param p_metric object metric
-     * @return consistency
+     * @param p_size size
+     * @return stream with index pairs
      */
-    public static IConsistency numeric( final IFilter p_filter, final IMetric p_metric )
+    private static Stream<Pair<Integer, Integer>> generateindex( final int p_size )
     {
-        return new CMarkowChainConsistency( EAlgorithm.NUMERICAL, p_filter, p_metric, 0, 0.001 );
-    }
-
-    /**
-     * factory heuristic algorithm
-     *
-     * @param p_filter metric filter
-     * @param p_metric object metric
-     * @return consistency
-     */
-    public static IConsistency heuristic( final IFilter p_filter, final IMetric p_metric )
-    {
-        return new CMarkowChainConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, 8, 0.001 );
-    }
-
-    /**
-     * factory heuristic algorithm
-     *
-     * @param p_filter metric filter
-     * @param p_metric object metric
-     * @param p_iteration number of iterations
-     * @return consistency
-     */
-    public static IConsistency heuristic( final IFilter p_filter, final IMetric p_metric, final int p_iteration )
-    {
-        return new CMarkowChainConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, p_iteration, 0.001 );
-    }
-
-    /**
-     * factory numerical algorithm
-     *
-     * @param p_filter metric filter
-     * @param p_metric object metric
-     * @param p_iteration number of iterations
-     * @param p_epsilon epsilon
-     * @return consistency
-     */
-    public static IConsistency heuristic( final IFilter p_filter, final IMetric p_metric, final int p_iteration, final double p_epsilon )
-    {
-        return new CMarkowChainConsistency( EAlgorithm.FIXPOINT, p_filter, p_metric, p_iteration, p_epsilon );
+        return IntStream.range( 0, p_size ).boxed().flatMap( i -> IntStream.range( i, p_size ).filter( j -> i != j ).boxed().map( j -> new ImmutablePair<>( i, j ) ) );
     }
 
 

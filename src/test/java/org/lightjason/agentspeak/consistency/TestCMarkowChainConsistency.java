@@ -33,7 +33,9 @@ import org.lightjason.agentspeak.consistency.metric.CDiscreteDistance;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.testing.IBaseTest;
 
+import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 /**
@@ -99,13 +101,16 @@ public final class TestCMarkowChainConsistency extends IBaseTest
         ).add( l_agent1, l_agent2, l_agent3 ).call();
 
 
-        System.out.println( l_consistency.consistency( l_agent1 ) );
-        System.out.println( l_consistency.consistency( l_agent2 ) );
-        System.out.println( l_consistency.consistency( l_agent3 ) );
+        Assert.assertArrayEquals(
+            Stream.of( 0.5, 0.7240092377397959, 0.775990762260204 ).toArray(),
+            l_consistency.consistency().map( Map.Entry::getValue ).sorted().toArray()
+        );
 
-        Assert.assertEquals( 0.0, l_consistency.consistency( l_agent1 ) - l_consistency.consistency( l_agent2 ), 0.01  );
-        Assert.assertEquals( 0.2, l_consistency.consistency( l_agent1 ) - l_consistency.consistency( l_agent3 ), 0.05  );
-        Assert.assertEquals( 0.2, l_consistency.consistency( l_agent2 ) - l_consistency.consistency( l_agent3 ), 0.05  );
+
+        Assert.assertArrayEquals(
+            Stream.of( 0.22400923773979595, 0.27599076226020414, 0.5 ).toArray(),
+            l_consistency.inconsistency().map( Map.Entry::getValue ).sorted().toArray()
+        );
     }
 
 }

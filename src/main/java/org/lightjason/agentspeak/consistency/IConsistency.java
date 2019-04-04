@@ -40,13 +40,13 @@ public interface IConsistency extends Callable<IConsistency>
 {
 
     /**
-     * returns the consistency of an object
+     * returns the consistency of an agent
      *
-     * @param p_object object
+     * @param p_agent agent
      * @return consistency or default consistency
      */
     @Nonnegative
-    double consistency( @Nonnull final IAgent<?> p_object );
+    double consistency( @Nonnull final IAgent<?> p_agent );
 
     /**
      * stream over all data
@@ -57,13 +57,13 @@ public interface IConsistency extends Callable<IConsistency>
     Stream<Map.Entry<IAgent<?>, Double>> consistency();
 
     /**
-     * returns the inconsistency of an object
+     * returns the inconsistency of an agent
      *
-     * @param p_object object
+     * @param p_agent agent
      * @return consistency or default consistency
      */
     @Nonnegative
-    double inconsistency( @Nonnull final IAgent<?> p_object );
+    double inconsistency( @Nonnull final IAgent<?> p_agent );
 
     /**
      * stream over all data
@@ -72,7 +72,6 @@ public interface IConsistency extends Callable<IConsistency>
      */
     @Nonnull
     Stream<Map.Entry<IAgent<?>, Double>> inconsistency();
-
 
     /**
      * returns statistic data of the consistency values
@@ -100,7 +99,6 @@ public interface IConsistency extends Callable<IConsistency>
     @Nonnull
     IConsistency add( @Nonnull final Stream<IAgent<?>> p_agents );
 
-
     /**
      * removes agents
      *
@@ -118,7 +116,6 @@ public interface IConsistency extends Callable<IConsistency>
      */
     @Nonnull
     IConsistency remove( @Nonnull final Stream<IAgent<?>> p_agents );
-
 
     /**
      * clear
