@@ -197,7 +197,7 @@ public final class TestCMarkowChainConsistency extends IBaseTest
         Assert.assertArrayEquals(
             Stream.of( 0.33225070359075737, 0.3324919942364805, 0.33525730217276223 ).mapToDouble( i -> i ).toArray(),
             l_consistency.inconsistency().mapToDouble( Map.Entry::getValue ).sorted().toArray(),
-            0.01
+            0.1
         );
 
         Assert.assertArrayEquals(
@@ -207,7 +207,7 @@ public final class TestCMarkowChainConsistency extends IBaseTest
                 l_consistency.inconsistency( l_agent2 ),
                 l_consistency.inconsistency( l_agent3 )
             ).mapToDouble( i -> i ).sorted().toArray(),
-            0.01
+            0.1
         );
     }
 
