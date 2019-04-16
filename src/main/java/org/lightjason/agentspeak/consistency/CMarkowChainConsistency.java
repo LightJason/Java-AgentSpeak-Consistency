@@ -76,7 +76,7 @@ public final class CMarkowChainConsistency implements IConsistency
     /**
      * default epsilon
      */
-    public static final double DEFAULTEPSILON = 0.001;
+    public static final double DEFAULTEPSILON = CCommon.FLOATINGPRECISION.doubleValue();
     /**
      * default value on non-existing objects
      */
