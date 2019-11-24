@@ -346,7 +346,7 @@ public final class CMarkowChainConsistency implements IConsistency
          * @param p_iteration number of iterations
          * @return largest eigenvector (not normalized)
          *
-         * @see http://en.wikipedia.org/wiki/Perron%E2%80%93Frobenius_theorem
+         * @see <a href="http://en.wikipedia.org/wiki/Perron%E2%80%93Frobenius_theorem"></a>
          */
         private static DoubleMatrix1D getLargestEigenvector( final DoubleMatrix2D p_matrix, final int p_iteration )
         {

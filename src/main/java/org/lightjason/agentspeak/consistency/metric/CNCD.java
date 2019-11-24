@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 /**
  * metric based on the normalized-compression-distance
  *
- * @see https://en.wikipedia.org/wiki/Normalized_compression_distance
+ * @see <a href="https://en.wikipedia.org/wiki/Normalized_compression_distance"></a>
  */
 public final class CNCD implements IMetric
 {

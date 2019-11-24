@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 /**
  * metric based on levenshtein distance
  *
- * @see https://en.wikipedia.org/wiki/Levenshtein_distance
+ * @see <a href="https://en.wikipedia.org/wiki/Levenshtein_distance"></a>
  */
 public final class CLevenshteinDistance implements IMetric
 {

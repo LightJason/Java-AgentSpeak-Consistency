@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 /**
  * metric interface of the coherency structure
  *
- * @see http://en.wikipedia.org/wiki/Metric_space
+ * @see <a href="http://en.wikipedia.org/wiki/Metric_space"></a>
  */
 public interface IMetric extends BiFunction<Stream<? extends ITerm>, Stream<? extends ITerm>, Number>
 {

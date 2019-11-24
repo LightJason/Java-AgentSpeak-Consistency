@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 /**
  * metric on collections returns the size of symmetric difference
  *
- * @see http://mathworld.wolfram.com/SymmetricDifference.html
+ * @see <a href="http://mathworld.wolfram.com/SymmetricDifference.html"></a>
  */
 public final class CSymmetricDifference implements IMetric
 {

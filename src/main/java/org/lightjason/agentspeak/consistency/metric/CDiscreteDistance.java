@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 /**
  * generic discrete metric
  *
- * @see http://mathworld.wolfram.com/DiscreteMetric.html
+ * @see <a href="http://mathworld.wolfram.com/DiscreteMetric.html"></a>
  */
 public final class CDiscreteDistance implements IMetric
 {
