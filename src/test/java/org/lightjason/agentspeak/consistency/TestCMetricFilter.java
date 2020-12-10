@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.beliefbase.CBeliefbase;
 import org.lightjason.agentspeak.beliefbase.storage.CMultiStorage;
@@ -55,6 +56,7 @@ import org.lightjason.agentspeak.language.execution.instantiable.plan.trigger.IT
 import org.lightjason.agentspeak.testing.IBaseTest;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,10 +117,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void symmetricweightequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "symmetric difference equality",
@@ -137,10 +139,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void symmetricweightinequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "symmetric difference inequality",
@@ -159,10 +161,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void weightequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "weight difference equality",
@@ -181,10 +183,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void weightinequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "weight difference inequality",
@@ -203,10 +205,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void discreteequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
                 "discrete difference equality",
@@ -225,10 +227,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void discreteinequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
                 "weight difference inequality",
@@ -247,10 +249,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void ncdequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "ncd difference equality",
@@ -268,10 +270,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void ncdinequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "ncd difference inequality",
@@ -294,10 +296,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void levenshteinequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "levenshtein difference equality",
@@ -316,10 +318,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void levenshteininequality()
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         this.check(
             "levenshtein difference inequality",
@@ -339,10 +341,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void filter() throws Exception
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         final IAgent<?> l_agent = m_agentgenerator.generatesingle();
         m_literals.forEach( i -> l_agent.beliefbase().generate( m_viewgenerator, i.functorpath() ).add( i ) );
@@ -377,10 +379,10 @@ public final class TestCMetricFilter extends IBaseTest
     @Test
     public void filterwithpath() throws Exception
     {
-        Assume.assumeNotNull( m_agentgenerator );
-        Assume.assumeNotNull( m_viewgenerator );
-        Assume.assumeNotNull( m_literals );
-        Assume.assumeFalse( ASSUMEMESSAGE, m_literals.isEmpty() );
+        Assumptions.assumeTrue( Objects.nonNull( m_agentgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_viewgenerator ) );
+        Assumptions.assumeTrue( Objects.nonNull( m_literals ) );
+        Assumptions.assumeFalse( m_literals.isEmpty(), ASSUMEMESSAGE );
 
         final IAgent<?> l_agent = m_agentgenerator.generatesingle();
         Stream.concat(
