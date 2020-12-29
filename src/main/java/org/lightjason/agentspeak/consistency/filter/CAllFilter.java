@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 
 /**
- * filtering for all execution plans & beliefs
+ * filtering for all execution plans and beliefs
  */
 public final class CAllFilter extends IBaseFilter
 {
