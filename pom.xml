@@ -447,6 +447,9 @@
                     <filesets>
                         <fileset>
                             <directory>.</directory>
+                            <includes>
+                                <include>dependency-reduced-pom.xml</include>
+                            </includes>
                         </fileset>
                     </filesets>
                 </configuration>
